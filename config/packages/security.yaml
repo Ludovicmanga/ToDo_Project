@@ -1,0 +1,35 @@
+security:
+
+    enable_authenticator_manager: true
+
+    password_hashers:
+        App\Entity\User: 
+            algorithm: bcrypt
+
+    providers:
+        users_in_memory: { memory: null }
+        in_database:
+            entity:
+                class: App\Entity\User
+                property: username
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        main:
+            lazy: true
+            provider: in_database
+
+            form_login:
+                login_path: app_login
+                check_path: app_login
+
+            logout: ~
+
+  # Easy way to control access for large sections of your site
+    # Note: Only the *first* access control that matches will be used
+    access_control:
+        # - { path: ^/admin, roles: ROLE_ADMIN }
+        # - { path: ^/profile, roles: ROLE_USER }
