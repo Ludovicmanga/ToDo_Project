@@ -88,19 +88,33 @@ class TaskController extends AbstractController
     {
         $user = $this->getUser();
 
-        if ($user === $task->getUser()){
+        if($user === null){
+            $this->addFlash('error', 'Seuls les admins peuvent supprimer les tâches créées par des anonymes');
+            return $this->redirectToRoute('task_list');
+        }
+
+        if ($user != null AND $user === $task->getUser()){
             $em = $this->getDoctrine()->getManager();
             $em->remove($task);
             $em->flush();
 
             $this->addFlash('success', 'La tâche a bien été supprimée.');
 
-            return $this->redirectToRoute('task_list');
-        } else {
-            $this->addFlash('error', 'Vous devez avoir créé la tâche pour la modifier.');
+        } elseif ($task->getUser() === null) {
+            if($user->getRoles()[0] === 'ROLE_ADMIN') {
+                $em = $this->getDoctrine()->getManager();
+                $em->remove($task);
+                $em->flush();
 
-            return $this->redirectToRoute('task_list');
+            $this->addFlash('success', 'La tâche a bien été supprimée.');
+            } else {
+                $this->addFlash('error', 'Seuls les admins peuvent supprimer les tâches créées par des anonymes');
+            }
+        } else {
+            $this->addFlash('error', 'Vous devez avoir créé la tâche pour la supprimer.');
         }
+
+        return $this->redirectToRoute('task_list');
         
     }
 }
