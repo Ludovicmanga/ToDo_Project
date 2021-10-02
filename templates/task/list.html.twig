@@ -3,6 +3,7 @@
 {% block header_img %}<img class="slide-image" src="{{ asset('img/todolist_content.jpg') }}" alt="todo list">{% endblock %}
 
 {% block body %}
+    <h1>Liste des tâches</h1>
     <a href="{{ path('task_create') }}" class="btn btn-info pull-right">Créer une tâche</a>
     <div class="row">
         {% for task in tasks %}
@@ -23,6 +24,9 @@
                     </form>
                     <form action="{{ path('task_delete', {'id' : task.id }) }}">
                         <button class="btn btn-danger btn-sm pull-right">Supprimer</button>
+                    </form>
+                    <form action="{{ path('task_edit', {'id' : task.id }) }}">
+                        <button class="btn btn-warning btn-sm pull-right">Modifier</button>
                     </form>
                 </div>
             </div>

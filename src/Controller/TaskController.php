@@ -50,11 +50,16 @@ class TaskController extends AbstractController
      */
     public function editAction(Task $task, Request $request)
     {
-        $form = $this->createForm(TaskType::class, $task);
+        if($this->getUser() != $task->getUser()) {
 
+            $this->addFlash('error', 'Vous ne pouvez pas modifier une tâche qui ne vous appartient pas ');
+            return $this->redirectToRoute('task_list');
+        }
+
+        $form = $this->createForm(TaskType::class, $task);
         $form->handleRequest($request);
 
-        if ($form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->flush();
 
             $this->addFlash('success', 'La tâche a bien été modifiée.');
@@ -73,6 +78,12 @@ class TaskController extends AbstractController
      */
     public function toggleTaskAction(Task $task)
     {
+        if($this->getUser() != $task->getUser()) {
+
+            $this->addFlash('error', 'Vous ne pouvez pas marquer une tâche comme faite ou non-faite si elle ne vous appartient pas');
+            return $this->redirectToRoute('task_list');
+        }
+
         $task->toggle(!$task->isDone());
         $this->getDoctrine()->getManager()->flush();
 
@@ -89,32 +100,19 @@ class TaskController extends AbstractController
         $user = $this->getUser();
 
         if($user === null){
-            $this->addFlash('error', 'Seuls les admins peuvent supprimer les tâches créées par des anonymes');
-            return $this->redirectToRoute('task_list');
-        }
-
-        if ($user != null AND $user === $task->getUser()){
-            $em = $this->getDoctrine()->getManager();
-            $em->remove($task);
-            $em->flush();
-
-            $this->addFlash('success', 'La tâche a bien été supprimée.');
-
-        } elseif ($task->getUser() === null) {
-            if($user->getRoles()[0] === 'ROLE_ADMIN') {
+            $this->addFlash('error', 'Il faut être connecté pour pouvoir supprimer une tâche');
+            return $this->redirectToRoute('app_login');
+        } else {
+            if($user === $task->getUser() || $user->getRoles()[0] === 'ROLE_ADMIN'){
                 $em = $this->getDoctrine()->getManager();
                 $em->remove($task);
                 $em->flush();
 
-            $this->addFlash('success', 'La tâche a bien été supprimée.');
+                $this->addFlash('success', 'La tâche a bien été supprimée.');
             } else {
-                $this->addFlash('error', 'Seuls les admins peuvent supprimer les tâches créées par des anonymes');
+                $this->addFlash('error', 'Cette tâche ne vous appartient pas');
             }
-        } else {
-            $this->addFlash('error', 'Vous devez avoir créé la tâche pour la supprimer.');
+            return $this->redirectToRoute('task_list');
         }
-
-        return $this->redirectToRoute('task_list');
-        
     }
 }
