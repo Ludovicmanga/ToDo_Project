@@ -9,22 +9,36 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 Class TaskControllerTest extends WebTestCase
 {
-    public function createValidTask($client, $title, $content)
+    /**
+     * It is not a test function
+     * Used in order to perform the tests with a logged user
+     */
+    public function logTheUserIn($email, $client)
     {
-        $crawler = $client->request('GET', '/tasks/create');
-        $form = $crawler->selectButton('Ajouter')->form([
+        $userRepository = static::$container->get(UserRepository::class);
+        $userToLogIn = $userRepository->findOneByEmail($email);
+        $client->loginUser($userToLogIn);
+    }
+
+    /**
+     * It is not a test function
+     * Used to fill the task creation or edition form
+     */
+     public function createOrEditTaskWithForm($client, $crawler, $button, $title, $content)
+    {
+        $form = $crawler->selectButton($button)->form([
             'task[title]' => $title,
-            'task[content]' => $title
+            'task[content]' => $content
         ]);
         $client->submit($form);
-    }
+    } 
 
     public function testListAction()
     {
         $client = static::createClient();
         $client->request('GET', '/tasks');
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
-        $this->assertSelectorExists('h1', 'Liste des tâches');
+        $this->assertSelectorExists('.task_list');
     }
 
     public function testCreateTask()
@@ -32,27 +46,22 @@ Class TaskControllerTest extends WebTestCase
         $client = static::createClient();
 
         //We log the user in
-        $userRepository = static::$container->get(UserRepository::class);
-        $testUser = $userRepository->findOneByEmail('ludovic.mangaj@gmail.com');
-        $client->loginUser($testUser);
+        $this->logTheUserIn('ludovic.mangaj@gmail.com', $client);
 
-        $this->createValidTask($client, 'test Title', 'Test Content');
+        $crawler = $client->request('GET', '/tasks/create');
+        $this->createOrEditTaskWithForm($client, $crawler, 'Ajouter', 'test Title', 'test Content');
         $this->assertResponseRedirects();
         $client->followRedirect();
         $this->assertSelectorExists('.alert.alert-success');
     }
 
-     public function testCreateActionWhileNotLoggedIn()
+     public function testCreateTaskWhileNotLoggedIn()
     {
         $client = static::createClient();
 
         //We don't log the user in
         $crawler = $client->request('GET', '/tasks/create');
-        $form = $crawler->selectButton('Ajouter')->form([
-            'task[title]' => 'Test Task While unlogged',
-            'task[content]' => 'Test Content'
-        ]);
-        $client->submit($form);
+        $this->createOrEditTaskWithForm($client, $crawler, 'Ajouter', 'Test Task While unlogged', 'Test Content');
         $this->assertResponseStatusCodeSame(500);
     }
 
@@ -61,20 +70,26 @@ Class TaskControllerTest extends WebTestCase
         $client = static::createClient();
 
         //We log the user in
-        $userRepository = static::$container->get(UserRepository::class);
-        $testUser = $userRepository->findOneByEmail('ludovic.mangaj@gmail.com');
-        $client->loginUser($testUser);
-
-        $crawler = $client->request('GET', '/tasks/17/edit');
-        $form = $crawler->selectButton('Modifier')->form([
-            'task[title]' => 'Test Edited Task',
-            'task[content]' => 'Test Edited Content'
-        ]);
-        $client->submit($form);
-
+        $this->logTheUserIn('ludovic.mangaj@gmail.com', $client);
+        
+        //We edit the task
+        $taskRepository = static::$container->get(TaskRepository::class);
+        $taskToEdit = $taskRepository->findOneByTitle('taskToEdit');
+        $crawler = $client->request('GET', '/tasks/'.$taskToEdit->getid().'/edit');
+        $this->createOrEditTaskWithForm($client, $crawler, 'Modifier', 'Test Edited Task', 'Test Edited Content');
         $this->assertResponseRedirects();
         $client->followRedirect();
-        $this->assertSelectorExists('.alert.alert-success');  
+        $this->assertSelectorExists('.alert.alert-success');
+
+         //We put it back to normal
+         $taskEdited = $taskRepository->findOneByTitle('Test Edited Task');
+         $crawler = $client->request('GET', '/tasks/'.$taskEdited->getId().'/edit');
+ 
+         $this->assertSelectorExists('.task_edit');
+         $this->createOrEditTaskWithForm($client, $crawler,'Modifier', 'taskToEdit','Test content');
+         $this->assertResponseRedirects();
+         $client->followRedirect();
+         $this->assertSelectorExists('.task_list');
     }
 
      public function testEditTaskWhenNotProprietary()
@@ -82,11 +97,11 @@ Class TaskControllerTest extends WebTestCase
         $client = static::createClient();
 
         //We log the user in
-        $userRepository = static::$container->get(UserRepository::class);
-        $testUser = $userRepository->findOneByEmail('victime@ipt.fr');
-        $client->loginUser($testUser);
-
-        $crawler = $client->request('GET', '/tasks/17/edit');
+        $this->logTheUserIn('victime@ipt.fr', $client);
+        
+        $taskRepository = static::$container->get(TaskRepository::class);
+        $taskToEdit = $taskRepository->findOneByTitle('taskToEdit');
+        $crawler = $client->request('GET', '/tasks/'.$taskToEdit->getid().'/edit');
         $this->assertResponseRedirects();
         $client->followRedirect();
         $this->assertSelectorExists('.alert.alert-danger');
@@ -97,13 +112,12 @@ Class TaskControllerTest extends WebTestCase
         $client = static::createClient();
 
         //We log the user in
-        $userRepository = static::$container->get(UserRepository::class);
-        $testUser = $userRepository->findOneByEmail('ludovic.mangaj@gmail.com');
-        $client->loginUser($testUser);
+        $this->logTheUserIn('ludovic.mangaj@gmail.com', $client);
 
         $taskRepository = static::$container->get(TaskRepository::class);
         $taskToToggle = $taskRepository->findOneByTitle('taskToToggle');
 
+        //If the button is marked as undone, we toggle it and make sure it is now done. Or the contrary if it is already marked as done.
         if($taskToToggle->getIsDone() === false) {
             $crawler = $client->request('GET', '/tasks/'.$taskToToggle->getId().'/toggle');
             $this->assertResponseRedirects();
@@ -122,11 +136,11 @@ Class TaskControllerTest extends WebTestCase
         $client = static::createClient();
 
         //We log the user in
-        $userRepository = static::$container->get(UserRepository::class);
-        $testUser = $userRepository->findOneByEmail('victime@ipt.fr');
-        $client->loginUser($testUser);
+        $this->logTheUserIn('victime@ipt.fr', $client);
 
-        $crawler = $client->request('GET', '/tasks/17/edit');
+        $taskRepository = static::$container->get(TaskRepository::class);
+        $taskToToggle = $taskRepository->findOneByTitle('taskToToggle');
+        $crawler = $client->request('GET', '/tasks/'.$taskToToggle->getId().'/toggle');
         $this->assertResponseRedirects();
         $client->followRedirect();
         $this->assertSelectorExists('.alert.alert-danger');
@@ -137,11 +151,11 @@ Class TaskControllerTest extends WebTestCase
         $client = static::createClient();
 
         //We log the user in
-        $userRepository = static::$container->get(UserRepository::class);
-        $testUser = $userRepository->findOneByEmail('victime@ipt.fr');
-        $client->loginUser($testUser);
+        $this->logTheUserIn('victime@ipt.fr', $client);
 
-        $crawler = $client->request('GET', '/tasks/17/delete');
+        $taskRepository = static::$container->get(TaskRepository::class);
+        $taskToDelete = $taskRepository->findOneByTitle('taskToDelete');
+        $crawler = $client->request('GET', '/tasks/'.$taskToDelete->getId().'/delete');
         $this->assertResponseRedirects();
         $client->followRedirect();
         $this->assertSelectorExists('.alert.alert-danger');
@@ -152,9 +166,7 @@ Class TaskControllerTest extends WebTestCase
         $client = static::createClient();
 
         //We log the user in
-        $userRepository = static::$container->get(UserRepository::class);
-        $testUser = $userRepository->findOneByEmail('ludovic.mangaj@gmail.com');
-        $client->loginUser($testUser);
+        $this->logTheUserIn('ludovic.mangaj@gmail.com', $client);
 
         // We delete it
         $taskRepository = static::$container->get(TaskRepository::class);
@@ -164,7 +176,9 @@ Class TaskControllerTest extends WebTestCase
         $this->assertSelectorExists('h1', 'Liste des utilisateurs');
 
         // We create it back
-        $this->createValidTask($client, 'taskToDelete', 'test content');
+        $crawler = $client->request('GET', '/tasks/create');
+        $this->createOrEditTaskWithForm($client, $crawler, 'Ajouter', 'taskToDelete', 'taskToDelete');
+
         $this->assertResponseRedirects();
         $client->followRedirect();
         $this->assertSelectorExists('.alert.alert-success');

@@ -8,6 +8,19 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 Class SecurityControllerTest extends WebTestCase
 {
+    /**
+     * It is not a test function
+     * Used to fill the task creation or edition form
+     */
+    public function loginWithForm($client, $crawler, $button, $username, $password)
+    {
+        $form = $crawler->selectButton($button)->form([
+            '_username' => $username,
+            '_password' => $password
+        ]);
+        $client->submit($form);
+    }
+
     public function testDisplayLogin()
     {
         $client = static::createClient();
@@ -22,11 +35,7 @@ Class SecurityControllerTest extends WebTestCase
         $client = static::createClient();
         
         $crawler = $client->request('GET', '/login');
-        $form = $crawler->selectButton('login')->form([
-            '_username' => 'Ludovic',
-            '_password' => '2707'
-        ]);
-        $client->submit($form);
+        $this->loginWithForm($client, $crawler, 'login', 'Ludovic', '2707');
 
         $this->assertResponseRedirects();
         $client->followRedirect();
@@ -37,11 +46,7 @@ Class SecurityControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $crawler = $client->request('GET', '/login');
-        $form = $crawler->selectButton('login')->form([
-            '_username' => 'fakeUser',
-            '_password' => 'fakePassword'
-        ]);
-        $client->submit($form);
+        $this->loginWithForm($client, $crawler, 'login', 'fakeUser', 'fakePassword');
         $this->assertResponseRedirects();
         $client->followRedirect();
         $this->assertSelectorExists('.login');

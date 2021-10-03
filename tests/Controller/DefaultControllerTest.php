@@ -18,7 +18,7 @@ Class DefaultControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $client->request('GET', '/');
-        $this->assertSelectorExists('a', 'Créer une nouvelle tâche');
-        $this->assertSelectorExists('h1', 'Bienvenue sur Todo List');
+        $this->assertSelectorExists('.create_task');
+        $this->assertSelectorExists('.bienvenue');
     }
 }

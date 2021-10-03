@@ -5,6 +5,7 @@
 :computer: This project was created in the context of OpenClassRooms Symfony path. </br>
 :briefcase: It is the 7th project, and the first in which Symfony was used. 
 It was a very important project, as it allowed me to understand automated tests, and to manipulate someone else's code for the first time.
+This project uses Symfony 5.3.7
 
 ## Installation of the project
 
@@ -34,7 +35,7 @@ It was a very important project, as it allowed me to understand automated tests,
 
 ## Documentation of the project
 
-The documentation detailing the authentication can be found at the route : /build/html/authentication.html or in the file authentication.html, in the folder build
+:closed_book: The documentation detailing the authentication can be found at the route : /build/html/authentication.html or in the file authentication.html, in the folder build.
 
 The general documentation of the project can be found in the file index.html, in the same build folder.
 

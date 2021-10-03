@@ -39,16 +39,4 @@ Class TaskTest extends KernelTestCase
         $error = $validator->validate($task);
         $this->assertCount(0, $error);
     }
-
-     /*  public function testInvalidTask()
-    {
-        $user = new User();
-        $this->hydrateUser($user, 1000, 'Test', '$2y$13$mPfu/S76OECtDp0m0gAysu6HC3kDh71h3H8QgE11WUFkW12j27ph6', 'test@test.fr', ['ROLE_USER']);
-        $task = new Task();
-        $this->hydrateTask($task, 'test1', 'content test 1', 'content test 1', null, $user, New \DateTime());
-        self::bootKernel();
-        $validator = Validation::createValidator();
-        $error = $validator->validate($task);
-        $this->assertCount(1, $error);
-    } */
 }
