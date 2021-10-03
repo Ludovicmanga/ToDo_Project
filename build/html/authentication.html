@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Authentication system &mdash; To_do_project September 2021 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> To_do_project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Authentication system</a><ul>
+<li><a class="reference internal" href="#how-authentication-works-on-symfony">How authentication works on Symfony</a><ul>
+<li><a class="reference internal" href="#where-the-users-are-stored">Where the users are stored?</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#what-file-should-be-modified-and-why-to-implement-authentication-in-symfony">What file should be modified and why to implement authentication in Symfony</a><ul>
+<li><a class="reference internal" href="#implementing-the-security-component">Implementing the security component</a></li>
+<li><a class="reference internal" href="#creating-a-valid-user-class">Creating a valid user class</a></li>
+<li><a class="reference internal" href="#properly-setting-security-yaml-file">Properly setting security.yaml file</a></li>
+<li><a class="reference internal" href="#implement-a-login-authenticator">Implement a Login Authenticator</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">To_do_project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Authentication system</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/authentication.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="authentication-system">
+<h1>Authentication system<a class="headerlink" href="#authentication-system" title="Permalink to this headline"></a></h1>
+<section id="how-authentication-works-on-symfony">
+<h2>How authentication works on Symfony<a class="headerlink" href="#how-authentication-works-on-symfony" title="Permalink to this headline"></a></h2>
+<p>This documentation’s purpose is to explain how the authentication system works on symfony. For this project, we implemented the new Authenticator-based Security system (<a class="reference external" href="https://symfony.com/doc/current/security/authenticator_manager.html">https://symfony.com/doc/current/security/authenticator_manager.html</a>).</p>
+<p>For this project, we used the security component of Symfony, that used firewalls to protect the website.</p>
+<p>When a request points to a secured area of the website, we need to set a listener, called an”authenticator”. Its job will be to extract the user’s credentials from the current SymfonyComponentHttpFoundationRequest object, it should create a token, containing these credentials.</p>
+<p>The next thing the listener should do is ask the authentication manager to validate the given token, and return an authenticated token if the supplied credentials were found to be valid. The listener should then store the authenticated token using the token storage.</p>
+<section id="where-the-users-are-stored">
+<h3>Where the users are stored?<a class="headerlink" href="#where-the-users-are-stored" title="Permalink to this headline"></a></h3>
+<p>Storage of users in the database :</p>
+<p>Users are first stored in a database. The user provider then uses Doctrine to retrieve them. The entity provider can only query from one specific field, specified by the property config key. In our case, we chose the username.</p>
+<p>Storage in the session :</p>
+<p>The logged user is stored inside a token, using the token storage.</p>
+<p>At the end of every request (unless your firewall is stateless), your User object is serialized to the session. At the beginning of the next request, it’s deserialized and then passed to your user provider to “refresh” it (e.g. Doctrine queries for a fresh user). Then, the two User objects (the original from the session and the refreshed User object) are “compared” to see if they are “equal”. By default, the core AbstractToken class compares the return values of the getPassword(), getSalt() and getUserIdentifier() methods. If any of these are different, your user will be logged out. This is a security measure to make sure that malicious users can be de-authenticated if core user data changes.</p>
+</section>
+</section>
+<section id="what-file-should-be-modified-and-why-to-implement-authentication-in-symfony">
+<h2>What file should be modified and why to implement authentication in Symfony<a class="headerlink" href="#what-file-should-be-modified-and-why-to-implement-authentication-in-symfony" title="Permalink to this headline"></a></h2>
+<section id="implementing-the-security-component">
+<h3>Implementing the security component<a class="headerlink" href="#implementing-the-security-component" title="Permalink to this headline"></a></h3>
+<p>The first thing that must be done in order to implement authentication, if it is not already done, is to install the symfony’s security component by entering into the ACL “composer require symfony/security-bundle”.</p>
+</section>
+<section id="creating-a-valid-user-class">
+<h3>Creating a valid user class<a class="headerlink" href="#creating-a-valid-user-class" title="Permalink to this headline"></a></h3>
+<p>We then need to create a user class that implements the UserInterface. In order to implement it, some function must be created :
+- getRoles()
+- getPassword()
+- getSalt()
+- eraseCredentials()</p>
+<p>That is what we did with the class AppEntityUser.</p>
+</section>
+<section id="properly-setting-security-yaml-file">
+<h3>Properly setting security.yaml file<a class="headerlink" href="#properly-setting-security-yaml-file" title="Permalink to this headline"></a></h3>
+<p>The next thing that should be done is setting the packagesecurity.yaml file. We first need to set the parameter enable_authenticator_manager to true. It will activate the new authentication system.</p>
+<p>We then must set the PasswordHasher algorithm, which is the algorithm that Symfony will use to hash the passwords of users so that a hacker cannot know the actual passwords even if the database is hacked.
+In our case, we chose bcrypt.</p>
+<dl class="simple">
+<dt>password_hashers:</dt><dd><dl class="simple">
+<dt>AppEntityUser:</dt><dd><p>algorithm: bcrypt</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>We then need to Define a user provider.</p>
+<blockquote>
+<div><p>providers:
+app_user_provider:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>entity:</dt><dd><p>class: AppEntityUser
+property: username</p>
+</dd>
+</dl>
+</div></blockquote>
+</div></blockquote>
+<p>The firewalls must then be set. In our case, we set the “main” firewall. It is recommended to only use one firewall (appart from the dev firewall).</p>
+</section>
+<section id="implement-a-login-authenticator">
+<h3>Implement a Login Authenticator<a class="headerlink" href="#implement-a-login-authenticator" title="Permalink to this headline"></a></h3>
+<p>We then must implement an authentication listener for this firewall. This listener has the role of performing some actions whenever a user tries to login. If we want it, we could create several authenticators, and write the path to them by setting the parameter custom_authenticators.
+What we did is to create the class AppSecurityLoginFormAuthenticator, that extends the class SymfonyComponentSecurityHttpAuthenticatorAbstractLoginFormAuthenticator.</p>
+<p>Any authenticator (authentication listener) must implement the AuthenticatorInterface, that is the case for AbstractLoginFormAuthenticator.</p>
+<p>Once again, some methods must be implemented :
+- Supports() :</p>
+<blockquote>
+<div><p>Its mission is to determine whether the authenticator support the given Request.
+If this returns false, the authenticator will be skipped. Otherwise, the function authenticate() will be called.
+In our case, the authentication should be made using the route ‘app_login’, which leads to the URL /login, and to the login form.
+If the request is supported, the function authenticate() is called.</p>
+</div></blockquote>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Authenticate() :</dt><dd><p>It creates a “passport” for the current request with key information about the user, such as the password.
+If the user is found, the function createAuthenticatedToken() will be created, using the information from the “passport”.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>createAuthenticatedToken() :</dt><dd><p>It will create an “authenticated token” for the given user.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>onAuthenticationSuccess() :</dt><dd><p>If the login is successfull, this function will be called.
+It will define what happens after a successful login</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>onAuthenticationFailure() :</dt><dd><p>If the login is unsuccessfull, this function will be called.
+It will define what happens after an unsuccessful login</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>As we said earlier, if the authentication is successful, the user token will then be stored into the session, that will be accessible from many files of the app, such as controllers.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Ludovic Manga.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
