@@ -32,6 +32,10 @@ It was a very important project, as it allowed me to understand automated tests,
 8. Execute the automated tests, by running PHP Unit
 > vendor/bin/phpunit
 
+The documentation detailing the authentication can be found at the route : /build/html/authentication.html or in the file authentication.html, in the folder build
+
+The general documentation of the project can be found in the file index.html, in the same build folder.
+
 --- 
 
 ## License  copyright 
