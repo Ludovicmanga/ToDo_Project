@@ -11,6 +11,7 @@ Welcome to To_do_project's documentation!
    :caption: Contents:
 
    ./authentication.rst
+   ./contribute.rst
 
 Indices and tables
 ==================
