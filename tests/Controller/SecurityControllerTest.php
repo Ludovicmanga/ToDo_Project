@@ -22,7 +22,7 @@ Class SecurityControllerTest extends WebTestCase
         $client = static::createClient();
         
         $crawler = $client->request('GET', '/login');
-        $form = $crawler->selectButton('Se connecter')->form([
+        $form = $crawler->selectButton('login')->form([
             '_username' => 'Ludovic',
             '_password' => '2707'
         ]);
@@ -37,14 +37,14 @@ Class SecurityControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $crawler = $client->request('GET', '/login');
-        $form = $crawler->selectButton('Se connecter')->form([
+        $form = $crawler->selectButton('login')->form([
             '_username' => 'fakeUser',
             '_password' => 'fakePassword'
         ]);
         $client->submit($form);
         $this->assertResponseRedirects();
         $client->followRedirect();
-        $this->assertSelectorExists('.alert.alert-danger');
+        $this->assertSelectorExists('.login');
     }
 
     public function testLogout()
@@ -59,6 +59,6 @@ Class SecurityControllerTest extends WebTestCase
         $client->request('GET', '/logout');
         $this->assertResponseRedirects();
         $client->followRedirect();
-        $this->assertSelectorExists('a', 'Se connecter');
+        $this->assertSelectorExists('.login');
     }
 }

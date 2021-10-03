@@ -29,7 +29,7 @@ Class UserControllerTest extends WebTestCase
         $client->request('GET', '/user/');
         $this->assertResponseRedirects();
         $client->followRedirect();
-        $this->assertSelectorExists('button', 'Se connecter');
+        $this->assertSelectorExists('.login');
     }
 
     public function testLetAdminAccessUserManagement()
@@ -84,10 +84,7 @@ Class UserControllerTest extends WebTestCase
 
         // After creation, we delete it
         $userCreated = $userRepository->findOneByEmail('ludovicTest@gmail.com');
-        $token = $client->getContainer()->get('security.csrf.token_manager')->getToken('token-id')->getValue();
-        $crawler = $client->request('POST', '/user/'.$userCreated->getId(), [
-            '_token' => $token
-        ]);
+        $crawler = $client->request('POST', '/user/'.$userCreated->getId());
         $this->assertResponseRedirects();
         $client->followRedirect();
         $this->assertSelectorExists('h1', 'Liste des utilisateurs');
@@ -158,16 +155,15 @@ Class UserControllerTest extends WebTestCase
         $testUser = $userRepository->findOneByEmail('ludovic.mangaj@gmail.com');
         $client->loginUser($testUser);
 
+        //We delete it
+        
         $userToDelete = $userRepository->findOneByEmail('userToDelete@gmail.com');
-        $token = $client->getContainer()->get('security.csrf.token_manager')->getToken('user_item')->getValue();
-        $crawler = $client->request('POST', '/user/'.$userToDelete->getId(), [
-            '_token' => $token
-        ]);
+        $crawler = $client->request('POST', '/user/'.$userToDelete->getId());
         $this->assertResponseRedirects();
 
         // After deletion, we create it back
 
-         $crawler = $client->request('GET', '/user/new');
+        $crawler = $client->request('GET', '/user/new');
         $form = $crawler->selectButton('Enregistrer')->form([
             'user[username]' => 'userToDelete',
             'user[password]' => '2707',

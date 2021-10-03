@@ -49,7 +49,7 @@ Class TaskControllerTest extends WebTestCase
         //We don't log the user in
         $crawler = $client->request('GET', '/tasks/create');
         $form = $crawler->selectButton('Ajouter')->form([
-            'task[title]' => 'Test Task',
+            'task[title]' => 'Test Task While unlogged',
             'task[content]' => 'Test Content'
         ]);
         $client->submit($form);
