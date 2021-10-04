@@ -23,7 +23,7 @@ class AppFixtures extends Fixture
         $manager->persist($adminUser);
 
         $nonAdminUser = new User();
-        $nonAdminUser->setUserName('Victime')
+        $nonAdminUser->setUserName('NonUser')
             ->setRoles([])
             ->setPassword('$2y$13$kXV/Wd7Ulh66rf0JebM7C.0W5yWiI8Wofd0wK7gbqxs/G6/6pRDa2')
             ->setEmail('victime@ipt.fr')
