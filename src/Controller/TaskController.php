@@ -98,20 +98,15 @@ class TaskController extends AbstractController
     {
         $user = $this->getUser();
 
-        if($user === null){
-            $this->addFlash('error', 'Il faut être connecté pour pouvoir supprimer une tâche');
-            return $this->redirectToRoute('app_login');
-        } else {
-            if($user === $task->getUser()){
-                $em = $this->getDoctrine()->getManager();
-                $em->remove($task);
-                $em->flush();
+        if($user === $task->getUser()){
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($task);
+            $em->flush();
 
-                $this->addFlash('success', 'La tâche a bien été supprimée.');
-            } else {
-                $this->addFlash('error', 'Cette tâche ne vous appartient pas');
-            }
-            return $this->redirectToRoute('task_list');
+            $this->addFlash('success', 'La tâche a bien été supprimée.');
+        } else {
+            $this->addFlash('error', 'Cette tâche ne vous appartient pas');
         }
+        return $this->redirectToRoute('task_list');
     }
 }

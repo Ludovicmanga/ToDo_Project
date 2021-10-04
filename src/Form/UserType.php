@@ -28,7 +28,6 @@ class UserType extends AbstractType
                     'Admin' => 'ROLE_ADMIN',
                 ],
             ])
-    
             ->get('roles')
             ->addModelTransformer(new CallbackTransformer(
                 function ($rolesArray) {
