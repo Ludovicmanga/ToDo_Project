@@ -32,7 +32,7 @@ This project uses Symfony 5.3.7
 7.  Execute the fixtures
 > php bin/console doctrine:fixtures:load
 
-8. Execute the automated tests, by running PHP Unit
+8.  Execute the automated tests, by running PHP Unit
 > vendor/bin/phpunit
 
 ## Documentation of the project
