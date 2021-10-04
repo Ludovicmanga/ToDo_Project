@@ -36,6 +36,7 @@ Class TaskControllerTest extends WebTestCase
     public function testListAction()
     {
         $client = static::createClient();
+
         $client->request('GET', '/tasks');
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
         $this->assertSelectorExists('.task_list');
@@ -53,6 +54,7 @@ Class TaskControllerTest extends WebTestCase
         $this->assertResponseRedirects();
         $client->followRedirect();
         $this->assertSelectorExists('.alert.alert-success');
+        $this->assertSelectorExists('.task_list');
     }
 
      public function testCreateTaskWhileNotLoggedIn()
@@ -61,8 +63,9 @@ Class TaskControllerTest extends WebTestCase
 
         //We don't log the user in
         $crawler = $client->request('GET', '/tasks/create');
-        $this->createOrEditTaskWithForm($client, $crawler, 'Ajouter', 'Test Task While unlogged', 'Test Content');
-        $this->assertResponseStatusCodeSame(500);
+        $this->assertResponseRedirects();
+        $client->followRedirect();
+        $this->assertSelectorExists('.login');
     }
 
      public function testValidEditTask()

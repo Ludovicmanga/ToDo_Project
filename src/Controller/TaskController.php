@@ -52,7 +52,7 @@ class TaskController extends AbstractController
     {
         if($this->getUser() != $task->getUser()) {
 
-            $this->addFlash('error', 'Vous ne pouvez pas modifier une tâche qui ne vous appartient pas ');
+            $this->addFlash('error', 'Vous ne pouvez pas modifier une tâche qui ne vous appartient pas');
             return $this->redirectToRoute('task_list');
         }
 
@@ -79,7 +79,6 @@ class TaskController extends AbstractController
     public function toggleTaskAction(Task $task)
     {
         if($this->getUser() != $task->getUser()) {
-
             $this->addFlash('error', 'Vous ne pouvez pas marquer une tâche comme faite ou non-faite si elle ne vous appartient pas');
             return $this->redirectToRoute('task_list');
         }
@@ -103,7 +102,7 @@ class TaskController extends AbstractController
             $this->addFlash('error', 'Il faut être connecté pour pouvoir supprimer une tâche');
             return $this->redirectToRoute('app_login');
         } else {
-            if($user === $task->getUser() || $user->getRoles()[0] === 'ROLE_ADMIN'){
+            if($user === $task->getUser()){
                 $em = $this->getDoctrine()->getManager();
                 $em->remove($task);
                 $em->flush();
