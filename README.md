@@ -1,6 +1,7 @@
 # To-do project
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/fd21de1132a94d4a8377b1542dc851c4)](https://app.codacy.com/gh/Ludovicmanga/ToDo_Project?utm_source=github.com&utm_medium=referral&utm_content=Ludovicmanga/ToDo_Project&utm_campaign=Badge_Grade_Settings)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/fd21de1132a94d4a8377b1542dc851c4)](https://app.codacy.com/gh/Ludovicmanga/ToDo_Project?utm_source=github.com&utm_medium=referral&utm_content=Ludovicmanga/ToDo_Project&utm_campaign=Badge_Grade_Settings).
+The details of the project instructions is in the root of the project, and is named "project_instructions.pdf"
 
 **Version 1.0.0** 
 
